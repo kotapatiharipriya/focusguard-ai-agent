@@ -4,6 +4,8 @@ This project was previously named DriftGuard. Internal database and
 environment-variable names remain compatible so existing personal data can be
 migrated safely.
 
+## Deployed App: 
+https://focusguard-ai-agent.streamlit.app/
 ## Public repository scope
 
 This repository contains the actual implementation and a privacy-safe demo:
