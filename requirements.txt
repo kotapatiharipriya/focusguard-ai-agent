@@ -1,0 +1,6 @@
+# DriftGuard runs on the Python standard library. These add the extras:
+streamlit>=1.45      # the dashboard (app/dashboard.py)
+pandas>=2.0          # dashboard data shaping
+altair>=5.0          # dashboard charts
+pystray>=0.19        # menu-bar / system-tray icon
+pillow>=10           # tray icon image

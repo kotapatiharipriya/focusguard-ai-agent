@@ -1,0 +1,65 @@
+{
+  "manifest_version": 3,
+  "name": "FocusGuard AI",
+  "version": "0.9.0",
+  "description": "Blocks the sites you choose, sends you to your tasks and a focus timer instead, and shows how much you really watch. Private: nothing leaves your computer.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "idle",
+    "alarms",
+    "notifications",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8765/*",
+    "http://localhost:8765/*",
+    "*://*.youtube.com/*",
+    "*://*.reddit.com/*",
+    "*://*.x.com/*",
+    "*://*.twitter.com/*",
+    "*://*.instagram.com/*",
+    "*://*.tiktok.com/*",
+    "*://*.facebook.com/*",
+    "*://news.ycombinator.com/*",
+    "*://*.twitch.tv/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://*.reddit.com/*",
+        "*://*.x.com/*",
+        "*://*.twitter.com/*",
+        "*://*.instagram.com/*",
+        "*://*.tiktok.com/*",
+        "*://*.facebook.com/*",
+        "*://news.ycombinator.com/*",
+        "*://*.twitch.tv/*"
+      ],
+      "js": [
+        "src/sites.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "FocusGuard AI",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

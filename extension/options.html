@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · FocusGuard AI</title>
+<link rel="icon" href="icons/icon32.png">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .cols { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: start; margin-top: 12px; }
+  .stack { display: grid; gap: 20px; }
+  .modes-help { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13.5px; color: var(--muted); margin: 0 0 16px; }
+  .modes-help b { color: var(--ink); font-weight: 600; }
+  .site { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .site .name { flex: 1 1 160px; min-width: 0; }
+  .site .name b { display: block; font-weight: 600; }
+  .site .name span { color: var(--faint); font-size: 13px; }
+  .site .limit { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--muted); }
+  .site .limit input { width: 64px; padding: 6px 8px; text-align: right; }
+  .site .remove { font-size: 13px; }
+  .add { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .add .input { flex: 1; min-width: 200px; }
+  .err { color: var(--danger); font-size: 14px; margin-top: 8px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .row:first-of-type { border-top: 0; }
+  .row label { font-weight: 550; }
+  .row p { color: var(--muted); font-size: 13.5px; }
+  .row .input { width: 76px; text-align: right; }
+  .conn { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--faint); flex: none; }
+  .dot.on { background: var(--tide); }
+  details summary { cursor: pointer; color: var(--muted); font-size: 14px; margin-top: 8px; }
+  details .input { margin-top: 8px; font-family: ui-monospace, monospace; font-size: 13px; }
+  .data { display: flex; gap: 8px; flex-wrap: wrap; }
+  @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="focus.html"><img src="icons/icon48.png" alt="">FocusGuard AI</a>
+  <nav class="nav" aria-label="FocusGuard AI">
+    <a href="focus.html">Focus</a>
+    <a href="report.html">Report</a>
+    <a href="options.html" aria-current="page">Settings</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="cols">
+    <section class="panel" aria-labelledby="sitesTitle">
+      <h2 id="sitesTitle">Sites</h2>
+      <p class="lede">Choose what happens on each site. Changes apply right away.</p>
+      <div class="modes-help">
+        <b>Off</b><span>Ignored completely.</span>
+        <b>Track</b><span>Counted in your report, never blocked.</span>
+        <b>Limit</b><span>Open for a set number of minutes a day, then blocked.</span>
+        <b>Block</b><span>Opening it takes you to your Focus page instead.</span>
+      </div>
+      <div id="sites"></div>
+      <form class="add" id="addForm">
+        <label class="sr-only" for="newSite">Website to add</label>
+        <input class="input" id="newSite" placeholder="Add a website, like netflix.com" autocomplete="off">
+        <button class="btn btn-primary" type="submit">Add site</button>
+      </form>
+      <p class="err" id="addErr" hidden></p>
+      <p class="muted small" style="margin-top:12px">Every site you add counts during focus sessions too: while the timer runs, all of them are blocked.</p>
+    </section>
+
+    <div class="stack">
+      <section class="panel" aria-labelledby="youTitle">
+        <h2 id="youTitle">About you</h2>
+        <p class="lede" id="youSummary">Answer a few questions so FocusGuard AI can set itself up for you.</p>
+        <div class="row">
+          <div><label for="protectOn">Protected hours</label><p>Every tracked site is closed during this time.</p></div>
+          <span class="switch"><input type="checkbox" id="protectOn"><span></span></span>
+        </div>
+        <div class="row" id="protectTimes"><label>From</label><span><input class="input" type="time" id="protectStart" style="width:120px"> until <input class="input" type="time" id="protectEnd" style="width:120px"></span></div>
+        <a class="btn btn-quiet" href="onboarding.html" id="retake" style="margin-top:8px">Answer the questions</a>
+      </section>
+
+      <section class="panel" aria-labelledby="focusTitle">
+        <h2 id="focusTitle">Focus sessions</h2>
+        <div class="row"><label for="workMin">Focus length</label><span><input class="input" type="number" id="workMin" min="5" max="120"> min</span></div>
+        <div class="row"><label for="breakMin">Break length</label><span><input class="input" type="number" id="breakMin" min="1" max="60"> min</span></div>
+        <div class="row">
+          <div><label for="strict">Strict mode</label><p>No "I need it" passes on blocked sites.</p></div>
+          <span class="switch"><input type="checkbox" id="strict"><span></span></span>
+        </div>
+        <div class="row" id="passRow1"><label for="passesPerDay">Passes per day</label><input class="input" type="number" id="passesPerDay" min="0" max="20"></div>
+        <div class="row" id="passRow2"><label for="passMinutes">Pass length</label><span><input class="input" type="number" id="passMinutes" min="1" max="30"> min</span></div>
+      </section>
+
+      <section class="panel" aria-labelledby="appTitle">
+        <h2 id="appTitle">FocusGuard AI app</h2>
+        <p class="lede">The app on your computer adds loop detection, nudges and the weekly coach. The extension works without it.</p>
+        <div class="conn"><span class="dot" id="connDot"></span><span id="connText">Checking…</span></div>
+        <details>
+          <summary>Connection details</summary>
+          <label class="small muted" for="backendUrl">App address</label>
+          <input class="input" id="backendUrl">
+          <label class="small muted" for="token" style="display:block;margin-top:8px">Token (filled in automatically)</label>
+          <input class="input" id="token" type="password">
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="dataTitle">
+        <h2 id="dataTitle">Your data</h2>
+        <p class="lede">Everything is stored in this browser and, if it's running, the FocusGuard AI app on this computer. Nothing is sent anywhere else. No addresses, titles or searches are kept, only which site and for how long.</p>
+        <div class="data">
+          <button class="btn btn-quiet" id="export">Export as JSON</button>
+          <button class="btn btn-quiet" id="clear">Clear report history</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<div class="toast" id="toast" hidden role="status"></div>
+<script src="src/sites.js"></script>
+<script src="src/store.js"></script>
+<script src="src/profile.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Focus · FocusGuard AI</title>
+<link rel="icon" href="icons/icon32.png">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .layout { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; align-items: start; }
+
+  /* Timer: the one bold element. A tide ring with an amber buoy riding the edge. */
+  .timer { text-align: center; padding: 28px 22px 24px; }
+  .timer-mode { font-size: 14px; color: var(--muted); font-weight: 550; min-height: 21px; }
+  .ring { position: relative; width: min(280px, 72vw); aspect-ratio: 1; margin: 14px auto 18px; }
+  .ring svg { width: 100%; height: 100%; display: block; }
+  .ring .track { stroke: var(--tide-soft); }
+  .ring .fill { stroke: var(--tide); transition: stroke-dashoffset 1s linear; }
+  .ring .buoy { fill: var(--buoy); stroke: var(--surface); stroke-width: 4; }
+  .ring.break .fill { stroke: var(--faint); }
+  .ring.idle .buoy { display: none; }
+  .clock { position: absolute; inset: 0; display: grid; place-content: center; gap: 2px; }
+  .clock b { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: clamp(48px, 9vw, 68px); font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+  .clock span { font-size: 14px; color: var(--muted); }
+  .on-task { font-size: 16px; font-weight: 600; margin-bottom: 14px; overflow-wrap: anywhere; }
+  .on-task:empty { display: none; }
+  .picker { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .picker label { font-size: 14px; color: var(--muted); white-space: nowrap; }
+  .picker select { max-width: 260px; }
+  .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .moods { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+
+  /* Tasks */
+  .add { display: flex; gap: 8px; margin-bottom: 8px; }
+  .tasks { list-style: none; margin: 0; padding: 0; }
+  .task { display: flex; align-items: center; gap: 12px; padding: 11px 4px; border-bottom: 1px solid var(--line); }
+  .task:last-child { border-bottom: 0; }
+  .task input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--tide); flex: none; cursor: pointer; }
+  .task .title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .task.done .title { color: var(--faint); text-decoration: line-through; }
+  .task .poms { display: flex; gap: 3px; flex: none; }
+  .task .poms i { width: 7px; height: 7px; border-radius: 50%; background: var(--tide); display: block; }
+  .task .focus-btn { padding: 6px 10px; font-size: 13px; }
+  .task .del { opacity: 0; padding: 4px 8px; font-size: 18px; line-height: 1; }
+  .task:hover .del, .task .del:focus-visible { opacity: 1; }
+  .task.current { background: var(--tide-soft); border-radius: 10px; border-bottom-color: transparent; padding-left: 10px; padding-right: 10px; }
+  .empty { color: var(--muted); padding: 18px 4px 6px; }
+  details.done-list { margin-top: 12px; }
+  details.done-list summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 6px 0; }
+
+  /* Today line */
+  .today { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px 28px; color: var(--muted); font-size: 14px; }
+  .today b { color: var(--ink); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  /* Pass */
+  .pass { margin-top: 18px; font-size: 14px; color: var(--muted); }
+  .pass form { display: flex; gap: 8px; margin-top: 10px; max-width: 560px; flex-wrap: wrap; }
+  .pass .input { flex: 1; min-width: 220px; }
+  .err { color: var(--danger); font-size: 14px; margin-top: 8px; }
+
+  .goal-line { margin: 6px 0 4px; font-size: 14.5px; color: var(--ink); }
+  .goal-line b { color: var(--tide-strong); font-weight: 600; }
+  /* "What pulled you here?" */
+  .why { margin-top: 12px; }
+  .why-q { font-weight: 600; font-size: 14.5px; margin-bottom: 8px; color: var(--ink); }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { appearance: none; font: inherit; font-size: 14px; font-weight: 550; cursor: pointer; color: var(--ink);
+          background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; }
+  .chip:hover { border-color: var(--buoy); }
+  .why-a { margin-top: 10px; color: var(--ink) !important; font-weight: 550; }
+
+  /* Steps from "Break down" */
+  .task.sub { padding-left: 34px; }
+  .task.sub .title { font-size: 14.5px; }
+  .task .steps-btn { padding: 6px 10px; font-size: 13px; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="focus.html"><img src="icons/icon48.png" alt="">FocusGuard AI</a>
+  <nav class="nav" aria-label="FocusGuard AI">
+    <a href="focus.html" aria-current="page">Focus</a>
+    <a href="report.html">Report</a>
+    <a href="options.html">Settings</a>
+  </nav>
+</header>
+
+<main class="page">
+  <section class="banner" id="banner" hidden aria-live="polite">
+    <div>
+      <h1 id="bannerTitle"></h1>
+      <p id="bannerText"></p>
+      <div class="why" id="why" hidden>
+        <p class="why-q">What pulled you here?</p>
+        <div class="chips">
+          <button class="chip" data-reason="bored">Bored</button>
+          <button class="chip" data-reason="avoiding">Avoiding something</button>
+          <button class="chip" data-reason="tired">Tired</button>
+          <button class="chip" data-reason="stress">Stressed</button>
+          <button class="chip" data-reason="habit">Just habit</button>
+        </div>
+      </div>
+      <p class="why-a" id="whyAnswer" hidden></p>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section class="panel timer" aria-label="Focus timer">
+      <div class="timer-mode" id="mode">Ready when you are</div>
+      <div class="ring idle" id="ring">
+        <svg viewBox="0 0 220 220" aria-hidden="true">
+          <circle class="track" cx="110" cy="110" r="96" fill="none" stroke-width="12"/>
+          <circle class="fill" id="fill" cx="110" cy="110" r="96" fill="none" stroke-width="12" stroke-linecap="round" transform="rotate(-90 110 110)"/>
+          <circle class="buoy" id="buoy" cx="110" cy="14" r="9"/>
+        </svg>
+        <div class="clock"><b id="clock" role="timer" aria-live="off">25:00</b><span id="clockSub">minutes of focus</span></div>
+      </div>
+      <div class="on-task" id="onTask"></div>
+
+      <div id="idleControls">
+        <div class="picker">
+          <label for="taskPick">Focus on</label>
+          <select class="input" id="taskPick"></select>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary btn-lg" id="start">Start 25-minute focus</button>
+        </div>
+      </div>
+
+      <div id="runControls" hidden>
+        <div class="actions">
+          <button class="btn btn-quiet" id="stop">Stop session</button>
+        </div>
+      </div>
+
+      <div id="doneControls" hidden>
+        <div class="actions" id="doneActions">
+          <button class="btn btn-primary" id="breakBtn">Take a 5-minute break</button>
+          <button class="btn btn-quiet" id="againBtn">Start another</button>
+        </div>
+        <div class="moods" id="moods" hidden>
+          <button class="btn btn-quiet" data-mood="better">Better</button>
+          <button class="btn btn-quiet" data-mood="same">About the same</button>
+          <button class="btn btn-quiet" data-mood="worse">Worse</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="tasksTitle">
+      <h2 id="tasksTitle">Your tasks</h2>
+      <p class="goal-line" id="goalLine" hidden></p>
+      <p class="lede" id="tasksLede">What you'd rather be doing. Pick one and give it 25 minutes.</p>
+      <form class="add" id="addForm">
+        <label class="sr-only" for="newTask">New task</label>
+        <input class="input" id="newTask" maxlength="140" placeholder="Add a task, then press Enter" autocomplete="off">
+        <button class="btn btn-primary" type="submit">Add</button>
+      </form>
+      <ul class="tasks" id="tasks"></ul>
+      <p class="note" id="stepsNote" hidden></p>
+      <p class="empty" id="empty">No tasks yet. Start with the one thing you've been putting off.</p>
+      <details class="done-list" id="doneWrap" hidden>
+        <summary id="doneSummary">Done today</summary>
+        <ul class="tasks" id="doneTasks"></ul>
+      </details>
+    </section>
+  </div>
+
+  <div class="today" id="today"></div>
+
+  <section class="pass" id="pass" hidden>
+    <button class="btn btn-text" id="passAsk">I need this site for something specific</button>
+    <form id="passForm" hidden>
+      <input class="input" id="passReason" maxlength="120" placeholder="What do you need it for?" autocomplete="off">
+      <button class="btn btn-quiet" type="submit" id="passGo">Open for 5 minutes</button>
+    </form>
+    <p class="err" id="passErr" hidden></p>
+  </section>
+</main>
+<script src="src/sites.js"></script>
+<script src="src/store.js"></script>
+<script src="src/profile.js"></script>
+<script src="focus.js"></script>
+</body>
+</html>

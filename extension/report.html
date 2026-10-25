@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report · FocusGuard AI</title>
+<link rel="icon" href="icons/icon32.png">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 12px 0 18px; }
+  .summary { font-size: clamp(22px, 3.2vw, 30px); line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; max-width: 30ch; }
+  .summary .num { color: var(--tide-strong); }
+  .summary .up { color: var(--buoy); }
+  .figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .figure { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .figure b { display: block; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 600; }
+  .figure span { color: var(--muted); font-size: 13.5px; }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: start; }
+  .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .chart .axis { fill: var(--faint); font-size: 11px; font-family: var(--font); }
+  .chart .grid { stroke: var(--line); }
+  .chart .bar-d { fill: var(--buoy); }
+  .chart .bar-f { fill: var(--tide); }
+  .legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-weight: 550; color: var(--muted); font-size: 13px; padding: 0 8px 8px 0; }
+  th:not(:first-child), td:not(:first-child) { text-align: right; }
+  td { padding: 10px 8px 10px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .site { display: grid; gap: 6px; min-width: 140px; }
+  .meter { height: 6px; border-radius: 999px; background: var(--tide-soft); overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--buoy); border-radius: 999px; }
+  .coach ul { margin: 8px 0 0; padding-left: 18px; }
+  .coach li { margin: 8px 0; }
+  .coach .tip { margin-top: 14px; background: var(--tide-soft); border-radius: 10px; padding: 12px 14px; }
+  .coach .src { margin-top: 12px; font-size: 12.5px; color: var(--faint); }
+  .coach .goal { margin-top: 14px; font-size: 14px; color: var(--muted); }
+  .coach .goal b { color: var(--ink); font-weight: 600; }
+  .coach .technique { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .coach .technique h3 { font-size: 15px; margin-bottom: 6px; }
+  .coach .technique p { font-size: 14px; margin-top: 6px; }
+  .coach .technique .src { margin-top: 8px; }
+  .stack { display: grid; gap: 20px; }
+  td:nth-child(2) { white-space: nowrap; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) {
+    th:nth-child(3), td:nth-child(3), th:nth-child(4), td:nth-child(4) { display: none; }
+    .site { min-width: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="focus.html"><img src="icons/icon48.png" alt="">FocusGuard AI</a>
+  <nav class="nav" aria-label="FocusGuard AI">
+    <a href="focus.html">Focus</a>
+    <a href="report.html" aria-current="page">Report</a>
+    <a href="options.html">Settings</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="head">
+    <p class="summary" id="summary">Loading your report…</p>
+    <div class="seg" role="group" aria-label="Time range">
+      <button data-range="1" aria-pressed="false">Today</button>
+      <button data-range="7" aria-pressed="true">7 days</button>
+      <button data-range="30" aria-pressed="false">30 days</button>
+    </div>
+  </div>
+
+  <div class="figures" id="figures"></div>
+
+  <div class="grid2">
+    <div class="stack">
+      <section class="panel chart" aria-labelledby="chartTitle">
+        <h2 id="chartTitle">Each day</h2>
+        <p class="lede" id="chartLede">Time on distracting sites next to time spent focusing.</p>
+        <div id="chart"></div>
+        <div class="legend"><span><i style="background:var(--buoy)"></i>Distracting sites</span><span id="legendF"><i style="background:var(--tide)"></i>Focus</span></div>
+      </section>
+      <section class="panel" aria-labelledby="sitesTitle">
+        <h2 id="sitesTitle">By site</h2>
+        <p class="lede">Visits count each time you switched to the site. Turned around counts how often FocusGuard AI sent you to Focus instead.</p>
+        <table id="sites"></table>
+      </section>
+    </div>
+    <section class="panel coach" aria-labelledby="coachTitle" id="coach">
+      <h2 id="coachTitle">Coach</h2>
+      <div id="coachBody"><p class="muted">Looking at your week…</p></div>
+    </section>
+  </div>
+</main>
+<script src="src/sites.js"></script>
+<script src="src/store.js"></script>
+<script src="report.js"></script>
+</body>
+</html>

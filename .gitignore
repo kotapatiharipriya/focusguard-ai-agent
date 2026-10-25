@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+data/*
+!data/.gitkeep
+data/.collector_token
+data/*.db
+data/*.sqlite3
+data/config.json
+data/history/
+data/profile/
+.streamlit/secrets.toml

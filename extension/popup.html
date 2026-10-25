@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="ui.css">
+<style>
+  body { width: 340px; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; }
+  .brand img { width: 22px; height: 22px; }
+  .state { font-size: 13px; color: var(--muted); font-weight: 550; }
+  .state.focus { color: var(--tide-strong); }
+  .state.paused { color: var(--buoy); }
+  main { padding: 0 16px 14px; }
+  .big { font-size: 20px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+  .big .num { color: var(--tide-strong); }
+  .bars { margin: 12px 0 4px; display: grid; gap: 8px; }
+  .bar { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 13px; }
+  .bar .meter { grid-column: 1 / -1; height: 5px; border-radius: 999px; background: var(--tide-soft); overflow: hidden; }
+  .bar .meter i { display: block; height: 100%; background: var(--buoy); border-radius: 999px; }
+  .facts { color: var(--muted); font-size: 13.5px; margin: 10px 0 14px; }
+  .facts b { color: var(--ink); font-weight: 600; }
+  .primary { width: 100%; }
+  .links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .links.four { grid-template-columns: repeat(4, 1fr); }
+  #dashMsg { margin-top: 8px; }
+  .plan-line { font-size: 13px; margin: -6px 0 12px; padding: 8px 10px; border-radius: 10px; background: var(--tide-soft); }
+  .plan-line b { color: var(--tide-strong); }
+  .setup { appearance: none; font: inherit; text-align: left; width: 100%; cursor: pointer; margin-bottom: 12px;
+           background: var(--tide-soft); border: 1px solid var(--tide); border-radius: 12px; padding: 10px 12px; color: var(--ink); }
+  .setup b { display: block; font-size: 14px; }
+  .setup span { font-size: 12.5px; color: var(--muted); }
+  .links .btn { font-size: 13.5px; padding: 8px 6px; }
+  footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px 12px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; background: var(--faint); vertical-align: 1px; }
+  .dot.on { background: var(--tide); }
+  footer .btn-text { font-size: 12.5px; padding: 2px 4px; }
+</style>
+</head>
+<body>
+  <header>
+    <span class="brand"><img src="icons/icon48.png" alt="">FocusGuard AI</span>
+    <span class="state" id="state">Watching</span>
+  </header>
+  <main>
+    <button class="setup" id="setup" hidden>
+      <b>Set FocusGuard AI up for you</b>
+      <span>Eight quick questions, about a minute.</span>
+    </button>
+    <p class="big" id="big">Loading…</p>
+    <div class="bars" id="bars"></div>
+    <p class="facts" id="facts"></p>
+    <p class="plan-line" id="planLine" hidden></p>
+    <button class="btn btn-primary btn-lg primary" id="focusBtn">Start 25-minute focus</button>
+    <div class="links" id="links">
+      <button class="btn btn-quiet" data-open="focus.html">Tasks</button>
+      <button class="btn btn-quiet" data-open="report.html">Report</button>
+      <button class="btn btn-quiet" id="dashBtn" hidden>Dashboard</button>
+      <button class="btn btn-quiet" data-open="options.html">Settings</button>
+    </div>
+    <p class="small muted" id="dashMsg" hidden></p>
+  </main>
+  <footer>
+    <span id="conn"><span class="dot"></span>Working on its own</span>
+    <button class="btn btn-text" id="pauseBtn">Pause 1 hour</button>
+  </footer>
+<script src="src/store.js"></script>
+<script src="src/profile.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

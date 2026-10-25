@@ -1,0 +1,29 @@
+# DriftGuard dashboard theme: mist and deep-water teal, with amber for "caught you".
+[theme]
+font = "'Avenir Next', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif"
+headingFont = "'Avenir Next', 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif"
+baseRadius = "medium"
+showSidebarBorder = true
+chartCategoricalColors = ["#D97F1E", "#1F7A74", "#7B908D", "#4F8FBF", "#B5651D"]
+
+[theme.light]
+primaryColor = "#1F7A74"
+backgroundColor = "#EEF3F1"
+secondaryBackgroundColor = "#E2EAE7"
+textColor = "#10282B"
+linkColor = "#165C57"
+borderColor = "#D3DEDB"
+
+[theme.dark]
+primaryColor = "#5CC2B6"
+backgroundColor = "#0D1B1D"
+secondaryBackgroundColor = "#132326"
+textColor = "#E4EEEC"
+linkColor = "#7FD3C8"
+borderColor = "#2A3F42"
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
